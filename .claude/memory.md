@@ -624,14 +624,27 @@ O servidor extrai `connection.name` para personalizar o assunto do email.
 
 ## Última Atualização
 
-**Data:** 2025-10-31 08:30
-**Ação:** Correção completa de inconsistências de porta
+**Data:** 2025-11-12 23:46
+**Ação:** Otimização completa do layout de email para dispositivos móveis
 **Mudanças:**
-- ✅ Corrigidos todos os scripts shell (.sh) para usar porta 7000
-- ✅ Documentado que logs vão para systemd journal (não arquivo .log)
-- ✅ Verificado que webhook_server.py usa porta 7000
-- ✅ Verificado que serviço systemd (webhook-email.service) está correto
-- ✅ Todas as documentações (README.md, memory.md, AIRBYTE_URLS_CONFIGURACAO.md) verificadas
+- ✅ Layout responsivo otimizado para mobile (airbyte_endpoints.py)
+- ✅ Margens laterais reduzidas: 20px → 8px
+- ✅ Container principal: max-width 800px → 650px
+- ✅ Padding geral reduzido: 30px → 15px
+- ✅ Tipografia ajustada: títulos menores, textos mais compactos
+- ✅ Grid layout substituído por table layout (melhor compatibilidade)
+- ✅ Métricas lado a lado usando estrutura de tabelas
+- ✅ Job IDs com word-break para evitar overflow
+- ✅ Botões e links com tamanhos otimizados
+- ✅ Seções de erro mais compactas
+- ✅ Payload colapsável com menos espaço
 
-**Status:** Projeto 100% consistente com porta 7000 em todos os arquivos ativos
+**Detalhes Técnicos:**
+- Body padding: 20px → 8px
+- Max-width: 800px → 650px
+- Font-sizes reduzidos em ~20%
+- Todos os paddings internos reduzidos proporcionalmente
+- Melhor aproveitamento de espaço em telas pequenas
+
+**Status:** Layout 100% otimizado para mobile, mantendo legibilidade e funcionalidade
 

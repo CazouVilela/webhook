@@ -153,9 +153,9 @@ def send_airbyte_detailed_email(event_type, data, recipients):
         if records_emitted > 0 and records_committed < records_emitted:
             loss_percentage = ((records_emitted - records_committed) / records_emitted) * 100
             data_loss = f"""
-            <div style="background: #FFF3CD; border-left: 4px solid #FFC107; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                <h4 style="margin: 0 0 10px 0; color: #856404;">⚠️ Perda de Dados Detectada</h4>
-                <p style="margin: 0; color: #856404;">
+            <div style="background: #FFF3CD; border-left: 4px solid #FFC107; padding: 12px; margin: 15px 0; border-radius: 6px;">
+                <h4 style="margin: 0 0 8px 0; color: #856404; font-size: 14px;">⚠️ Perda de Dados Detectada</h4>
+                <p style="margin: 0; color: #856404; font-size: 13px;">
                     <strong>{records_emitted - records_committed} registros</strong> não foram confirmados
                     ({loss_percentage:.1f}% de perda)
                 </p>
@@ -199,33 +199,33 @@ def send_airbyte_detailed_email(event_type, data, recipients):
                 origin_name = source.get('name', 'Fonte') if error_origin == 'source' else destination.get('name', 'Destino')
                 origin_text = f"""
                 <tr>
-                    <td style="padding: 10px; color: #666;"><strong>{origin_icon} Origem do Erro:</strong></td>
-                    <td style="padding: 10px; color: #333;"><strong>{origin_name}</strong> ({error_origin})</td>
+                    <td style="padding: 6px; color: #666;"><strong>{origin_icon} Origem:</strong></td>
+                    <td style="padding: 6px; color: #333;"><strong>{origin_name}</strong> ({error_origin})</td>
                 </tr>
                 """
 
             error_section = f"""
-            <div style="background: #F8D7DA; border-left: 5px solid #DC3545; padding: 20px; margin: 25px 0; border-radius: 5px;">
-                <h3 style="color: #721C24; margin-top: 0;">
+            <div style="background: #F8D7DA; border-left: 4px solid #DC3545; padding: 15px; margin: 15px 0; border-radius: 6px;">
+                <h3 style="color: #721C24; margin-top: 0; font-size: 16px;">
                     {error_info['icon']} {error_info['title']}
                 </h3>
-                <table style="width: 100%; font-size: 14px;">
+                <table style="width: 100%; font-size: 13px;">
                     <tr>
-                        <td style="padding: 10px; color: #666; width: 30%;"><strong>📝 Mensagem:</strong></td>
-                        <td style="padding: 10px; color: #333; font-weight: bold;">{error_message or 'Erro sem mensagem específica'}</td>
+                        <td style="padding: 6px; color: #666; width: 35%;"><strong>📝 Mensagem:</strong></td>
+                        <td style="padding: 6px; color: #333; font-weight: bold; word-break: break-word;">{error_message or 'Erro sem mensagem específica'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 10px; color: #666;"><strong>🏷️ Tipo de Erro:</strong></td>
-                        <td style="padding: 10px; color: #333;">{error_type or 'Não especificado'}</td>
+                        <td style="padding: 6px; color: #666;"><strong>🏷️ Tipo:</strong></td>
+                        <td style="padding: 6px; color: #333;">{error_type or 'Não especificado'}</td>
                     </tr>
                     {origin_text}
                     <tr>
-                        <td style="padding: 10px; color: #666;"><strong>💡 Descrição:</strong></td>
-                        <td style="padding: 10px; color: #555; font-style: italic;">{error_info['description']}</td>
+                        <td style="padding: 6px; color: #666;"><strong>💡 Descrição:</strong></td>
+                        <td style="padding: 6px; color: #555; font-style: italic; font-size: 12px;">{error_info['description']}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 10px; color: #666;"><strong>🔧 Ação Recomendada:</strong></td>
-                        <td style="padding: 10px; color: #333; background: #FFF3CD; border-radius: 3px;">
+                        <td style="padding: 6px; color: #666;"><strong>🔧 Ação:</strong></td>
+                        <td style="padding: 6px; color: #333; background: #FFF3CD; border-radius: 3px; font-size: 12px;">
                             {error_info['action']}
                         </td>
                     </tr>
@@ -241,59 +241,59 @@ def send_airbyte_detailed_email(event_type, data, recipients):
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #F5F7FA;">
-            <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 8px; background: #F5F7FA;">
+            <div style="max-width: 650px; width: 100%; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
 
                 <!-- Header -->
-                <div style="background: linear-gradient(135deg, {config['color']} 0%, {config['color']}DD 100%); color: white; padding: 30px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 32px;">
+                <div style="background: linear-gradient(135deg, {config['color']} 0%, {config['color']}DD 100%); color: white; padding: 20px 15px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px;">
                         {config['emoji']} Airbyte Notification
                     </h1>
-                    <h2 style="margin: 10px 0 0 0; font-size: 20px; font-weight: normal; opacity: 0.95;">
+                    <h2 style="margin: 8px 0 0 0; font-size: 16px; font-weight: normal; opacity: 0.95;">
                         {config['label']}
                     </h2>
-                    <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 8px 16px; border-radius: 20px; margin-top: 15px;">
-                        <span style="font-size: 14px; font-weight: bold;">Prioridade: {config['priority']}</span>
+                    <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 6px 12px; border-radius: 15px; margin-top: 12px;">
+                        <span style="font-size: 12px; font-weight: bold;">Prioridade: {config['priority']}</span>
                     </div>
                 </div>
 
-                <div style="padding: 30px;">
+                <div style="padding: 15px;">
 
                     <!-- Informações da Conexão -->
-                    <div style="background: #F8F9FA; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid {config['color']};">
-                        <h3 style="color: #333; margin-top: 0; display: flex; align-items: center;">
+                    <div style="background: #F8F9FA; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid {config['color']};">
+                        <h3 style="color: #333; margin-top: 0; font-size: 16px;">
                             🔗 Informações da Conexão
                         </h3>
-                        <table style="width: 100%; font-size: 14px;">
+                        <table style="width: 100%; font-size: 13px;">
                             <tr>
-                                <td style="padding: 8px 0; color: #666; width: 30%;"><strong>Nome:</strong></td>
-                                <td style="padding: 8px 0; color: #333; font-weight: bold; font-size: 16px;">
+                                <td style="padding: 6px 0; color: #666; width: 35%;"><strong>Nome:</strong></td>
+                                <td style="padding: 6px 0; color: #333; font-weight: bold; font-size: 14px;">
                                     {connection.get('name', 'N/A')}
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>📥 Fonte:</strong></td>
-                                <td style="padding: 8px 0; color: #333;">{source.get('name', 'N/A')}</td>
+                                <td style="padding: 6px 0; color: #666;"><strong>📥 Fonte:</strong></td>
+                                <td style="padding: 6px 0; color: #333;">{source.get('name', 'N/A')}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>📤 Destino:</strong></td>
-                                <td style="padding: 8px 0; color: #333;">{destination.get('name', 'N/A')}</td>
+                                <td style="padding: 6px 0; color: #666;"><strong>📤 Destino:</strong></td>
+                                <td style="padding: 6px 0; color: #333;">{destination.get('name', 'N/A')}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>🏢 Workspace:</strong></td>
-                                <td style="padding: 8px 0; color: #333;">{workspace.get('name', 'N/A')}</td>
+                                <td style="padding: 6px 0; color: #666;"><strong>🏢 Workspace:</strong></td>
+                                <td style="padding: 6px 0; color: #333;">{workspace.get('name', 'N/A')}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>🔢 Job ID:</strong></td>
-                                <td style="padding: 8px 0; color: #333; font-family: monospace;">{job_id}</td>
+                                <td style="padding: 6px 0; color: #666;"><strong>🔢 Job ID:</strong></td>
+                                <td style="padding: 6px 0; color: #333; font-family: monospace; font-size: 11px; word-break: break-all;">{job_id}</td>
                             </tr>
                         </table>
 
                         {f'''
-                        <div style="margin-top: 15px; text-align: center;">
+                        <div style="margin-top: 12px; text-align: center;">
                             <a href="{connection.get('url', '#')}"
-                               style="display: inline-block; background: {config['color']}; color: white; padding: 10px 20px;
-                                      text-decoration: none; border-radius: 5px; font-weight: bold;">
+                               style="display: inline-block; background: {config['color']}; color: white; padding: 8px 16px;
+                                      text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px;">
                                 🔗 Ver Conexão no Airbyte
                             </a>
                         </div>
@@ -307,52 +307,57 @@ def send_airbyte_detailed_email(event_type, data, recipients):
                     {data_loss}
 
                     <!-- Métricas de Sincronização -->
-                    <div style="background: #E7F3FF; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                        <h3 style="color: #333; margin-top: 0;">📊 Métricas de Sincronização</h3>
+                    <div style="background: #E7F3FF; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                        <h3 style="color: #333; margin-top: 0; font-size: 16px;">📊 Métricas de Sincronização</h3>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                <div style="color: #666; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">📝 Registros</div>
-                                <div style="font-size: 28px; font-weight: bold; color: #007BFF; margin: 10px 0;">
-                                    {records_committed:,}
-                                </div>
-                                <div style="color: #999; font-size: 12px;">
-                                    de {records_emitted:,} emitidos
-                                </div>
-                            </div>
-
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                <div style="color: #666; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">💾 Volume</div>
-                                <div style="font-size: 28px; font-weight: bold; color: #28A745; margin: 10px 0;">
-                                    {bytes_committed}
-                                </div>
-                                <div style="color: #999; font-size: 12px;">
-                                    de {bytes_emitted} emitidos
-                                </div>
-                            </div>
-                        </div>
-
-                        <table style="width: 100%; font-size: 14px; background: white; border-radius: 5px; padding: 15px;">
+                        <table style="width: 100%; margin-bottom: 12px;" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td style="padding: 10px; color: #666;"><strong>⏰ Início:</strong></td>
-                                <td style="padding: 10px; color: #333;">{started_at}</td>
+                                <td style="width: 48%; padding-right: 2%;">
+                                    <div style="background: white; padding: 12px; border-radius: 5px; text-align: center;">
+                                        <div style="color: #666; font-size: 11px; text-transform: uppercase; margin-bottom: 5px;">📝 Registros</div>
+                                        <div style="font-size: 22px; font-weight: bold; color: #007BFF; margin: 8px 0;">
+                                            {records_committed:,}
+                                        </div>
+                                        <div style="color: #999; font-size: 11px;">
+                                            de {records_emitted:,} emitidos
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="width: 48%; padding-left: 2%;">
+                                    <div style="background: white; padding: 12px; border-radius: 5px; text-align: center;">
+                                        <div style="color: #666; font-size: 11px; text-transform: uppercase; margin-bottom: 5px;">💾 Volume</div>
+                                        <div style="font-size: 22px; font-weight: bold; color: #28A745; margin: 8px 0;">
+                                            {bytes_committed}
+                                        </div>
+                                        <div style="color: #999; font-size: 11px;">
+                                            de {bytes_emitted} emitidos
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table style="width: 100%; font-size: 13px; background: white; border-radius: 5px; padding: 10px;">
+                            <tr>
+                                <td style="padding: 6px; color: #666; width: 35%;"><strong>⏰ Início:</strong></td>
+                                <td style="padding: 6px; color: #333; font-size: 12px;">{started_at}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 10px; color: #666;"><strong>✅ Término:</strong></td>
-                                <td style="padding: 10px; color: #333;">{finished_at}</td>
+                                <td style="padding: 6px; color: #666;"><strong>✅ Término:</strong></td>
+                                <td style="padding: 6px; color: #333; font-size: 12px;">{finished_at}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 10px; color: #666;"><strong>⏱️ Duração:</strong></td>
-                                <td style="padding: 10px; color: #333; font-weight: bold;">
+                                <td style="padding: 6px; color: #666;"><strong>⏱️ Duração:</strong></td>
+                                <td style="padding: 6px; color: #333; font-weight: bold;">
                                     {duration_formatted if isinstance(duration_formatted, str) else f'{duration_formatted} segundos'}
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding: 10px; color: #666;"><strong>✔️ Status:</strong></td>
-                                <td style="padding: 10px;">
+                                <td style="padding: 6px; color: #666;"><strong>✔️ Status:</strong></td>
+                                <td style="padding: 6px;">
                                     <span style="background: {'#D4EDDA' if success else '#F8D7DA'};
                                                  color: {'#155724' if success else '#721C24'};
-                                                 padding: 5px 15px; border-radius: 15px; font-weight: bold;">
+                                                 padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 12px;">
                                         {'✅ Sucesso' if success else '❌ Falha'}
                                     </span>
                                 </td>
@@ -361,36 +366,36 @@ def send_airbyte_detailed_email(event_type, data, recipients):
                     </div>
 
                     <!-- Links Rápidos -->
-                    <div style="background: #FFF9E6; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #FFC107;">
-                        <h3 style="color: #333; margin-top: 0;">🔗 Links Rápidos</h3>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                            {f'<a href="{workspace.get("url", "#")}" style="flex: 1; min-width: 150px; background: white; color: #007BFF; padding: 12px; text-align: center; text-decoration: none; border-radius: 5px; border: 2px solid #007BFF; font-weight: bold;">🏢 Workspace</a>' if workspace.get('url') else ''}
-                            {f'<a href="{source.get("url", "#")}" style="flex: 1; min-width: 150px; background: white; color: #28A745; padding: 12px; text-align: center; text-decoration: none; border-radius: 5px; border: 2px solid #28A745; font-weight: bold;">📥 Fonte</a>' if source.get('url') else ''}
-                            {f'<a href="{destination.get("url", "#")}" style="flex: 1; min-width: 150px; background: white; color: #DC3545; padding: 12px; text-align: center; text-decoration: none; border-radius: 5px; border: 2px solid #DC3545; font-weight: bold;">📤 Destino</a>' if destination.get('url') else ''}
-                        </div>
+                    <div style="background: #FFF9E6; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #FFC107;">
+                        <h3 style="color: #333; margin-top: 0; font-size: 16px;">🔗 Links Rápidos</h3>
+                        <table style="width: 100%;" cellpadding="5" cellspacing="0">
+                            {f'<tr><td><a href="{workspace.get("url", "#")}" style="display: block; background: white; color: #007BFF; padding: 10px; text-align: center; text-decoration: none; border-radius: 5px; border: 2px solid #007BFF; font-weight: bold; font-size: 13px;">🏢 Workspace</a></td></tr>' if workspace.get('url') else ''}
+                            {f'<tr><td><a href="{source.get("url", "#")}" style="display: block; background: white; color: #28A745; padding: 10px; text-align: center; text-decoration: none; border-radius: 5px; border: 2px solid #28A745; font-weight: bold; font-size: 13px;">📥 Fonte</a></td></tr>' if source.get('url') else ''}
+                            {f'<tr><td><a href="{destination.get("url", "#")}" style="display: block; background: white; color: #DC3545; padding: 10px; text-align: center; text-decoration: none; border-radius: 5px; border: 2px solid #DC3545; font-weight: bold; font-size: 13px;">📤 Destino</a></td></tr>' if destination.get('url') else ''}
+                        </table>
                     </div>
 
                     <!-- Payload Completo (colapsável) -->
-                    <details style="margin: 25px 0;">
-                        <summary style="cursor: pointer; color: #007BFF; font-weight: bold; padding: 15px; background: #F8F9FA; border-radius: 5px; border: 1px solid #DEE2E6;">
-                            🔍 Payload Completo do Webhook (clique para expandir)
+                    <details style="margin: 15px 0;">
+                        <summary style="cursor: pointer; color: #007BFF; font-weight: bold; padding: 12px; background: #F8F9FA; border-radius: 5px; border: 1px solid #DEE2E6; font-size: 13px;">
+                            🔍 Payload Completo (clique para expandir)
                         </summary>
-                        <pre style="background: #F8F9FA; padding: 20px; border-radius: 5px; margin-top: 10px; font-size: 12px; overflow-x: auto; border: 1px solid #DEE2E6; max-height: 400px; overflow-y: auto;">
+                        <pre style="background: #F8F9FA; padding: 12px; border-radius: 5px; margin-top: 8px; font-size: 10px; overflow-x: auto; border: 1px solid #DEE2E6; max-height: 300px; overflow-y: auto;">
 {json.dumps(data, indent=2, ensure_ascii=False)}
                         </pre>
                     </details>
 
                     <!-- Footer -->
-                    <hr style="border: none; border-top: 2px solid #E9ECEF; margin: 30px 0 20px 0;">
+                    <hr style="border: none; border-top: 1px solid #E9ECEF; margin: 20px 0 15px 0;">
 
-                    <div style="text-align: center; color: #6C757D; font-size: 12px;">
-                        <p style="margin: 5px 0;">
+                    <div style="text-align: center; color: #6C757D; font-size: 11px;">
+                        <p style="margin: 4px 0;">
                             🤖 Notificação automática gerada por <strong>Airbyte Webhook Server</strong>
                         </p>
-                        <p style="margin: 5px 0;">
+                        <p style="margin: 4px 0;">
                             📧 Configurado por: <strong>{app.config['MAIL_USERNAME']}</strong>
                         </p>
-                        <p style="margin: 5px 0;">
+                        <p style="margin: 4px 0;">
                             🕐 Recebido em: <strong>{timestamp}</strong>
                         </p>
                     </div>
