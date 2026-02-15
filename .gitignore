@@ -53,3 +53,6 @@ airbyte_urls.txt
 # Temporary files
 *.tmp
 *.temp
+
+# Terminal logs (real-time session logs)
+terminal_logs/

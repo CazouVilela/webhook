@@ -283,6 +283,62 @@ def webhook_with_action(action):
             'message': str(e)
         }), 500
 
+def _render_dados_html(dados, header_color='#667eea'):
+    """
+    Renderiza os dados do webhook como cards HTML legíveis.
+    Cada chave do JSON vira uma seção separada com título e conteúdo.
+    Valores que são dicts/lists são renderizados como sub-itens.
+    """
+    if not dados:
+        return '<p style="color: #888; font-style: italic;">Nenhum dado recebido.</p>'
+
+    # Separar título (se houver) dos demais campos
+    titulo = dados.get('Titulo') or dados.get('titulo') or dados.get('Relatorio') or dados.get('relatorio')
+
+    html_parts = []
+
+    # Se tem título, renderizar como heading
+    if titulo:
+        html_parts.append(f'''
+        <div style="margin-bottom: 20px;">
+            <h2 style="color: #333; margin: 0 0 5px 0; font-size: 20px;">{titulo}</h2>
+            <hr style="border: none; border-top: 2px solid {header_color}; margin: 0;">
+        </div>''')
+
+    skip_keys = {'Titulo', 'titulo', 'Relatorio', 'relatorio'}
+
+    for key, value in dados.items():
+        if key in skip_keys:
+            continue
+
+        if isinstance(value, dict):
+            # Renderizar dict como tabela
+            rows = ''.join(f'<tr><td style="padding: 4px 8px; color: #555; font-weight: bold; vertical-align: top; white-space: nowrap;">{k}</td><td style="padding: 4px 8px; color: #333;">{v}</td></tr>' for k, v in value.items())
+            content_html = f'<table style="width: 100%; font-size: 14px; border-collapse: collapse;">{rows}</table>'
+        elif isinstance(value, list):
+            # Renderizar list como lista
+            items = ''.join(f'<li style="padding: 3px 0; color: #333;">{item}</li>' for item in value)
+            content_html = f'<ul style="margin: 0; padding-left: 20px; font-size: 14px;">{items}</ul>'
+        else:
+            # Renderizar string/number como texto
+            str_value = str(value)
+            # Quebrar em linhas se usar " / " como separador
+            if ' / ' in str_value and len(str_value) > 80:
+                items = str_value.split(' / ')
+                items_html = ''.join(f'<li style="padding: 3px 0; color: #333;">{item.strip()}</li>' for item in items)
+                content_html = f'<ul style="margin: 0; padding-left: 20px; font-size: 14px; list-style-type: disc;">{items_html}</ul>'
+            else:
+                content_html = f'<p style="margin: 0; font-size: 14px; color: #333; line-height: 1.6;">{str_value}</p>'
+
+        html_parts.append(f'''
+        <div style="background-color: #f9f9f9; padding: 15px 20px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid {header_color};">
+            <h4 style="color: #444; margin: 0 0 8px 0; font-size: 15px;">{key}</h4>
+            {content_html}
+        </div>''')
+
+    return '\n'.join(html_parts)
+
+
 def send_notification_email(webhook_info, recipient_emails, action=None):
     """
     Função para enviar email de notificação
@@ -297,12 +353,18 @@ def send_notification_email(webhook_info, recipient_emails, action=None):
         dados_limpos.pop(campo_email, None)
     
     try:
+        # Detectar título customizado do payload para usar no subject
+        payload_title = dados_limpos.get('Titulo') or dados_limpos.get('titulo') or dados_limpos.get('Relatorio') or dados_limpos.get('relatorio')
+
         # Preparar assunto com suporte ao Airbyte
-        if action:
+        if payload_title:
+            emoji = webhook_info.get('emoji', '📢')
+            subject = f'{emoji} {payload_title}'
+        elif action:
             emoji = webhook_info.get('emoji', '📢')
             label = webhook_info.get('label', action.upper())
             connection = webhook_info.get('connection_name', '')
-            
+
             if connection:
                 subject = f'{emoji} [{label}] {connection} - {webhook_info["timestamp"]}'
             else:
@@ -322,62 +384,29 @@ def send_notification_email(webhook_info, recipient_emails, action=None):
         }
         header_color = color_map.get(action, '#667eea')
         
+        # Detectar título customizado do payload
+        custom_title = dados_limpos.get('Titulo') or dados_limpos.get('titulo') or dados_limpos.get('Relatorio') or dados_limpos.get('relatorio')
+        header_title = custom_title or 'Notificação de Webhook'
+
         # Preparar corpo do email
         body = f"""
         <html>
         <body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f5f5f5; padding: 20px; margin: 0;">
             <div style="max-width: 800px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
-                
+
                 <!-- Header com cor dinâmica -->
                 <div style="background: linear-gradient(135deg, {header_color} 0%, {header_color}CC 100%); color: white; padding: 30px;">
-                    <h1 style="margin: 0; font-size: 28px;">
-                        {webhook_info.get('emoji', '🔔')} Notificação de Webhook
+                    <h1 style="margin: 0; font-size: 24px;">
+                        {webhook_info.get('emoji', '🔔')} {header_title}
                     </h1>
-                    {f'<p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.95;">Ação: {webhook_info.get("label", action)}</p>' if action else ''}
-                    {f'<p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Conexão: {webhook_info.get("connection_name")}</p>' if webhook_info.get("connection_name") else ''}
+                    <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.85;">{webhook_info.get('timestamp')}</p>
                 </div>
                 
                 <div style="padding: 30px;">
-                    <!-- Informações Gerais -->
-                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                        <h3 style="color: #333; margin-top: 0;">📊 Informações Gerais</h3>
-                        <table style="width: 100%; font-size: 14px;">
-                            <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>📅 Data/Hora:</strong></td>
-                                <td style="padding: 8px 0; color: #333;">{webhook_info.get('timestamp')}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>🌐 IP de Origem:</strong></td>
-                                <td style="padding: 8px 0; color: #333;">{webhook_info.get('ip_origem')}</td>
-                            </tr>
-                            {f'''<tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>⚡ Ação:</strong></td>
-                                <td style="padding: 8px 0; color: #333; font-weight: bold;">{webhook_info.get("acao")}</td>
-                            </tr>''' if webhook_info.get('acao') else ''}
-                            <tr>
-                                <td style="padding: 8px 0; color: #666;"><strong>📧 Enviado para:</strong></td>
-                                <td style="padding: 8px 0; color: #333;">{', '.join(webhook_info.get('destinatarios', []))}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
                     <!-- Dados Recebidos -->
-                    <div style="background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                        <h3 style="color: #333; margin-top: 0;">📦 Dados Recebidos</h3>
-                        <pre style="background-color: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 5px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 13px; max-height: 400px; overflow-y: auto;">
-{json.dumps(dados_limpos, indent=2, ensure_ascii=False)}
-                        </pre>
+                    <div style="margin-bottom: 20px;">
+                        {_render_dados_html(dados_limpos, header_color)}
                     </div>
-                    
-                    <!-- Headers (colapsável) -->
-                    <details style="margin-bottom: 20px;">
-                        <summary style="cursor: pointer; color: #667eea; font-weight: bold; padding: 10px; background: #f5f5f5; border-radius: 5px;">
-                            🔧 Headers da Requisição (clique para expandir)
-                        </summary>
-                        <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin-top: 10px; font-size: 12px; overflow-x: auto;">
-{json.dumps(webhook_info.get('headers', {}), indent=2, ensure_ascii=False)}
-                        </pre>
-                    </details>
                     
                     <!-- Footer -->
                     <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0 20px 0;">
@@ -401,17 +430,17 @@ def send_notification_email(webhook_info, recipient_emails, action=None):
         )
         
         # Adicionar versão em texto simples
+        dados_texto = '\n'.join(f'  {k}: {v}' if not isinstance(v, (dict, list)) else f'  {k}: {json.dumps(v, ensure_ascii=False)}' for k, v in dados_limpos.items())
         msg.body = f"""
         Notificação de Webhook
-        
+
         Data/Hora: {webhook_info.get('timestamp')}
         IP de Origem: {webhook_info.get('ip_origem')}
         {'Ação: ' + webhook_info.get('acao') if webhook_info.get('acao') else ''}
         {'Conexão: ' + webhook_info.get('connection_name') if webhook_info.get('connection_name') else ''}
         Enviado para: {', '.join(webhook_info.get('destinatarios', []))}
-        
-        Dados Recebidos:
-        {json.dumps(dados_limpos, indent=2, ensure_ascii=False)}
+
+{dados_texto}
         """
         
         # Enviar email
@@ -617,10 +646,18 @@ def send_airbyte_detailed_email(event_type, data, recipients):
         })
 
         # Extrair informações do payload
-        workspace = data.get('workspace', {})
-        connection = data.get('connection', {})
-        source = data.get('source', {})
-        destination = data.get('destination', {})
+        # Airbyte V2 pode enviar esses campos como string (nome) ou dict ({id, name, url})
+        def normalize_field(val, fallback='N/A'):
+            if isinstance(val, dict):
+                return val
+            elif isinstance(val, str):
+                return {'name': val}
+            return {'name': fallback}
+
+        workspace = normalize_field(data.get('workspace', {}), 'Default Workspace')
+        connection = normalize_field(data.get('connection', {}), 'Conexão Desconhecida')
+        source = normalize_field(data.get('source', {}), 'Fonte Desconhecida')
+        destination = normalize_field(data.get('destination', {}), 'Destino Desconhecido')
 
         # Informações do Job
         job_id = data.get('jobId', 'N/A')
